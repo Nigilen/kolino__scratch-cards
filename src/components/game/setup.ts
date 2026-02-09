@@ -4,10 +4,10 @@ export const setup = async (app: Application, sceneRef: HTMLDivElement) => {
   await app.init({
     width: sceneRef.offsetWidth,
     height: sceneRef.offsetHeight,
-    backgroundColor: 0xd3d3d3,
     antialias: true,
     autoDensity: true,
-    resolution: window.devicePixelRatio || 1
+    resolution: window.devicePixelRatio || 1,
+    backgroundAlpha: 0,
   });
   sceneRef.appendChild(app.canvas);
 }
