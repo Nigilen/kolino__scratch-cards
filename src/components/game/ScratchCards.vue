@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import ScratchLayout from '@/components/game/ScratchLayout.vue';
 import { data } from '@/data';
-
 </script>
 
 <template>
@@ -16,7 +15,6 @@ import { data } from '@/data';
 </template>
 
 <style lang="css" scoped>
-
 .list {
   display: flex;
   flex-wrap: wrap;
