@@ -49,7 +49,7 @@ const handleCardOpened = () => {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    inline-size: min(400px, 70vmin);
+    inline-size: clamp(100px, 30vmax, 400px);
     block-size: auto;
     aspect-ratio: 1.6;
     border: 2px solid var(--primary-color);
