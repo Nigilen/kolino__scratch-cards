@@ -1,11 +1,14 @@
 interface Data {
   title: string;
   cards: {
-    values: string[];
+    quantity: number;
+    values: {
+      win: string;
+      empty: string;
+    };
   };
   modal: {
     title: string;
-    bonus: string;
     button: string;
   };
 };
@@ -13,11 +16,14 @@ interface Data {
 export const data: Data = {
   title: 'Scratch The Cards',
   cards: {
-    values: ['2000', 'Empty', '50']
+    quantity: 3,
+    values: {
+      win: '100',
+      empty: 'empty'
+    }
   },
   modal: {
     title: 'Your prize',
-    bonus: 'none',
     button: 'Ok'
   }
 };

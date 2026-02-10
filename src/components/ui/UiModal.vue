@@ -2,7 +2,7 @@
 import { data } from '@/data';
 
 const props = defineProps<{
-  winValue: number;
+  winValue: number | string;
 }>();
 
 const emits = defineEmits<{
@@ -12,19 +12,16 @@ const emits = defineEmits<{
 const handleModalClose = () => {
   emits('modalClose');
 };
-
 </script>
 
 <template>
-
   <section class="modal">
     <div class="modal__content">
       <h2 class="modal__title">{{ data.modal.title }}</h2>
-      <p class="modal__bonuse">{{ data.modal.bonus }}</p>
+      <p class="modal__bonuse">{{ props.winValue }}</p>
       <button class="modal__button" type="button" @click="handleModalClose">{{ data.modal.button }}</button>
     </div>
   </section>
-
 </template>
 
 <style lang="css" scoped>

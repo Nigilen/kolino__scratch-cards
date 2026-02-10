@@ -1,17 +1,39 @@
 <script lang="ts" setup>
 import ScratchLayout from '@/components/game/ScratchLayout.vue';
 import { data } from '@/data';
+import { ref } from 'vue';
+
+const openCardsCounter = ref(0);
+const openedCardsCounter = ref(0);
+
+
+const emit = defineEmits<{
+  (event: 'gameEnd'): void;
+}>();
+
+const handleCardOpen = () => {
+  openCardsCounter.value++;
+};
+
+const handleCardOpened = () => {
+  openedCardsCounter.value++;
+  if (openedCardsCounter.value === data.cards.quantity) {
+    emit('gameEnd');
+  }
+};
+
 </script>
 
 <template>
-
   <ul class="list">
-    <li class="item" v-for="card in data.cards.values" :key="card">
-      <span class="item__bonus">{{ card }}</span>
-      <ScratchLayout />
+    <li class="item" v-for="card in data.cards.quantity" :key="card">
+      <ScratchLayout 
+        @cardOpen="handleCardOpen" 
+        @cardOpened="handleCardOpened"
+        :openCardsCounter="openCardsCounter" 
+      />
     </li>
   </ul>
-
 </template>
 
 <style lang="css" scoped>
@@ -27,22 +49,14 @@ import { data } from '@/data';
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    inline-size: min(400px, 70vmin);
+    inline-size: clamp(100px, 30vmax, 400px);
     block-size: auto;
     aspect-ratio: 1.6;
     border: 2px solid var(--primary-color);
-    background-color: var(--primary-color);
-    container-type: inline-size;
     border-radius: 32px;
     overflow: hidden;
   }
 
-  & .item__bonus {
-    position: relative;
-    font-size: 12cqi;
-    color: #E8E0D5;
-    text-transform: uppercase;
-  }
 }
 
 </style>

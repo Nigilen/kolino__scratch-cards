@@ -22,6 +22,7 @@ body {
   justify-content: center;
   inline-size: 100%;
   block-size: 100dvh;
+  padding: min(100px, 10vh) min(10px, 10vw);
   overflow: hidden;
 }
 

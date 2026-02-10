@@ -1,18 +1,45 @@
 <script lang="ts" setup>
-import { Application, Container, Graphics, RenderTexture, Ticker } from 'pixi.js';
-import { onMounted, onUnmounted, ref } from 'vue';
+import { Application, Assets, Container, Graphics, RenderTexture, Sprite, Text, Ticker } from 'pixi.js';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 import { handleResize } from '@/components/game/resize';
-import layoutImg from '@/assets/images/card-layout.avif';
+import baseLayerImg from '@/assets/images/base-layer.avif';
+import baseLayerImgWin from '@/assets/images/base-layer--win.avif';
+import coverLayerImg from '@/assets/images/cover-layer.avif';
 import { createCoverLayer } from '@/components/game/createCoverLayer';
+import { createBaseLayer } from '@/components/game/createBaseLayer';
+import { createMaskLayer } from '@/components/game/createMaskLayer';
 import { setup } from '@/components/game/setup';
 import { STATE } from '@/components/game/constants';
-import { createMaskLayer } from '@/components/game/createMaskLayer';
+import { data } from '@/data';
 
 const app = new Application();
 const sceneRef = ref<HTMLDivElement>();
 
 const currentX = ref({ x: 0, y: 50 });
 const movingTopRight = ref(true);
+
+const openedCardsCounter = ref(0);
+
+const props = defineProps<{
+  openCardsCounter: number;
+}>();
+
+const emits = defineEmits<{
+  (event: 'cardOpen', value: string): void;
+  (event: 'cardOpened'): void;
+}>();
+
+const handleClick = (value: string) => {
+  emits('cardOpen', value)
+};
+
+const handleOpenCard = async (value: Text, baseSprite: Sprite) => {
+  handleClick(value.text);
+  if (props.openCardsCounter === 1) {
+    value.text = data.cards.values.win;
+    baseSprite.texture = await Assets.load(baseLayerImgWin);
+  }
+};
 
 const updatePosition = (delta: number) => {
   if (movingTopRight.value) {
@@ -38,23 +65,31 @@ const renderMask = (masklLayer: Graphics, texture: RenderTexture) => {
   app.renderer.render({ container: masklLayer, target: texture });
 };
 
+
 const createCard = async () => {
   const container = new Container();
-  const cover = await createCoverLayer(layoutImg);
+  const { container: base, text, sprite: baseSprite } = await createBaseLayer(baseLayerImg, data.cards.values.empty, '#ffffff', 60);
+  const cover = await createCoverLayer(coverLayerImg);
   const { rect, texture } = await createMaskLayer(cover, app);
 
-  cover.on('pointerdown', () => {
-    app.ticker.add((ticker: Ticker) => animation(ticker.deltaTime));
-  });
 
-  const animation = (delta: number) => {
-    updatePosition(delta);
+  const scratchAnimation = (delta: Ticker) => {
+    updatePosition(delta.deltaTime);
     renderMask(rect, texture);
     if (currentX.value.y > STATE.WORLD_HEIGHT && currentX.value.x > STATE.WORLD_WIDTH) {
-      app.ticker.remove((ticker: Ticker) => animation(ticker.deltaTime));
+      app.ticker.remove(scratchAnimation);
+      emits('cardOpened');
+      openedCardsCounter.value++;
     }
   };
 
+  cover.once('pointerdown', () => {
+    handleOpenCard(text, baseSprite);
+    app.ticker.add(scratchAnimation);
+  });
+  
+
+  container.addChild(base);
   container.addChild(cover);
   app.stage.addChild(container);
 }  
@@ -63,6 +98,7 @@ onMounted(async () => {
   if (!sceneRef.value) return;
   await setup(app, sceneRef.value);
   await createCard();
+
   handleResize(app, sceneRef.value);
   window.addEventListener('resize', () => handleResize(app, sceneRef.value!));
 });
