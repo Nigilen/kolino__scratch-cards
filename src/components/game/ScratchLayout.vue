@@ -22,6 +22,7 @@ const openedCardsCounter = ref(0);
 
 const props = defineProps<{
   openCardsCounter: number;
+  isOpenModal: boolean;
 }>();
 
 const emits = defineEmits<{
@@ -93,6 +94,15 @@ const createCard = async () => {
   container.addChild(cover);
   app.stage.addChild(container);
 }  
+
+watch(() => props.isOpenModal, async () => {
+  if (!props.isOpenModal) {
+    app.stage.removeChildren();
+    openedCardsCounter.value = 0;
+    currentX.value = { x: 0, y: 50 };
+    await createCard();
+  };
+});
 
 onMounted(async () => {
   if (!sceneRef.value) return;

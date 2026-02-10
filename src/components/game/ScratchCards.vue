@@ -1,11 +1,14 @@
 <script lang="ts" setup>
 import ScratchLayout from '@/components/game/ScratchLayout.vue';
 import { data } from '@/data';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 const openCardsCounter = ref(0);
 const openedCardsCounter = ref(0);
 
+const props = defineProps<{
+  isOpenModal: boolean;
+}>();
 
 const emit = defineEmits<{
   (event: 'gameEnd'): void;
@@ -13,14 +16,23 @@ const emit = defineEmits<{
 
 const handleCardOpen = () => {
   openCardsCounter.value++;
+
 };
 
 const handleCardOpened = () => {
   openedCardsCounter.value++;
+  console.log(openedCardsCounter.value)
   if (openedCardsCounter.value === data.cards.quantity) {
     emit('gameEnd');
   }
 };
+
+watch(() => props.isOpenModal, () => {
+  if (!props.isOpenModal) {
+    openCardsCounter.value = 0;
+    openedCardsCounter.value = 0;
+  }
+});
 
 </script>
 
@@ -31,6 +43,7 @@ const handleCardOpened = () => {
         @cardOpen="handleCardOpen" 
         @cardOpened="handleCardOpened"
         :openCardsCounter="openCardsCounter" 
+        :isOpenModal="props.isOpenModal"
       />
     </li>
   </ul>
