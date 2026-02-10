@@ -22,6 +22,7 @@ const openedCardsCounter = ref(0);
 
 const props = defineProps<{
   openCardsCounter: number;
+  isOpenModal: boolean;
 }>();
 
 const emits = defineEmits<{
@@ -70,7 +71,7 @@ const createCard = async () => {
   const container = new Container();
   const { container: base, text, sprite: baseSprite } = await createBaseLayer(baseLayerImg, data.cards.values.empty, '#ffffff', 60);
   const cover = await createCoverLayer(coverLayerImg);
-  const { rect, texture } = await createMaskLayer(cover, app);
+  const { rect, texture } = await createMaskLayer(cover, app, STATE.WORLD_WIDTH, STATE.WORLD_HEIGHT);
 
 
   const scratchAnimation = (delta: Ticker) => {
@@ -93,6 +94,15 @@ const createCard = async () => {
   container.addChild(cover);
   app.stage.addChild(container);
 }  
+
+watch(() => props.isOpenModal, async () => {
+  if (!props.isOpenModal) {
+    app.stage.removeChildren();
+    openedCardsCounter.value = 0;
+    currentX.value = { x: 0, y: 50 };
+    await createCard();
+  };
+});
 
 onMounted(async () => {
   if (!sceneRef.value) return;

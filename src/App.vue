@@ -14,7 +14,7 @@ const handleOpenModal = () => {
 
 const handleCloseModal = () => {
   isOpenModal.value = false;
-  window.location.reload();
+  // window.location.reload();
 };
 
 </script>
@@ -24,6 +24,7 @@ const handleCloseModal = () => {
     <GameTitle />
     <ScratchCards 
       @gameEnd="handleOpenModal" 
+      :isOpenModal="isOpenModal"
     />
   </main>
   <Teleport to="body">

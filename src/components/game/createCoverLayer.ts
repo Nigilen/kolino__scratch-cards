@@ -1,5 +1,4 @@
 import { Assets, Container, Sprite } from "pixi.js";
-import { STATE } from "./constants";
 
 export const createCoverLayer = async (layerImg: string) => {
   const texture = await Assets.load(layerImg);
