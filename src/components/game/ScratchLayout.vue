@@ -83,5 +83,6 @@ onUnmounted(() => {
   inset: 0;
   inline-size: 100%;
   block-size: 100%;
+  cursor: pointer;
 }
 </style>
