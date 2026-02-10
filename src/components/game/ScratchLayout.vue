@@ -2,11 +2,13 @@
 import { Application, Container, Graphics, RenderTexture, Ticker } from 'pixi.js';
 import { onMounted, onUnmounted, ref } from 'vue';
 import { handleResize } from '@/components/game/resize';
-import layoutImg from '@/assets/images/card-layout.avif';
+import baseLayerImg from '@/assets/images/base-layer.avif';
+import coverLayerImg from '@/assets/images/cover-layer.avif';
 import { createCoverLayer } from '@/components/game/createCoverLayer';
+import { createBaseLayer } from '@/components/game/createBaseLayer';
+import { createMaskLayer } from '@/components/game/createMaskLayer';
 import { setup } from '@/components/game/setup';
 import { STATE } from '@/components/game/constants';
-import { createMaskLayer } from '@/components/game/createMaskLayer';
 
 const app = new Application();
 const sceneRef = ref<HTMLDivElement>();
@@ -40,7 +42,14 @@ const renderMask = (masklLayer: Graphics, texture: RenderTexture) => {
 
 const createCard = async () => {
   const container = new Container();
-  const cover = await createCoverLayer(layoutImg);
+  const base = await createBaseLayer(
+    baseLayerImg,
+    'red',
+    'empty',
+    '#ffffff',
+    60,
+  );
+  const cover = await createCoverLayer(coverLayerImg);
   const { rect, texture } = await createMaskLayer(cover, app);
 
   cover.on('pointerdown', () => {
@@ -55,6 +64,7 @@ const createCard = async () => {
     }
   };
 
+  container.addChild(base);
   container.addChild(cover);
   app.stage.addChild(container);
 }  
