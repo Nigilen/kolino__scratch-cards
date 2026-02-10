@@ -6,21 +6,15 @@ import ScratchCards from './components/game/ScratchCards.vue';
 import { data } from '@/data';
 
 const isOpenModal = ref(false);
-const isSpin = ref(false);
-const winValue = ref();
 
-const handleScratchStart = () => {
-  isSpin.value = true;
-};
 
-const handleOpenModal = (winSector: number) => {
+const handleOpenModal = () => {
   isOpenModal.value = true;
-  // winValue.value = data.cards.sectorsValue.bonuses[winSector - 1];
 };
 
 const handleCloseModal = () => {
   isOpenModal.value = false;
-  isSpin.value = false;
+  window.location.reload();
 };
 
 </script>
@@ -28,13 +22,15 @@ const handleCloseModal = () => {
 <template>
   <main class="main">
     <GameTitle />
-    <ScratchCards />
+    <ScratchCards 
+      @gameEnd="handleOpenModal" 
+    />
   </main>
   <Teleport to="body">
     <Transition>
       <UiModal 
         v-if="isOpenModal" 
-        :winValue="winValue" 
+        :winValue="data.cards.values.win" 
         @modalClose="handleCloseModal" 
       />
     </Transition>
@@ -46,6 +42,6 @@ const handleCloseModal = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  row-gap: min(100px, 12vmax);
+  row-gap: min(30px, 12vmax);
 }
 </style>

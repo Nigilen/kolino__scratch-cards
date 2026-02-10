@@ -3,11 +3,10 @@ import { STATE } from "./constants";
 
 export const createBaseLayer = async (
   layerImg: string,
-  rectFill: string, 
   textValue: string, 
   textFill: string,
   textSize: number 
-): Promise<Container> => {
+): Promise<{container: Container, text: Text, sprite: Sprite}> => {
   const container = new Container();
   const texture = await Assets.load(layerImg);
   const sprite = new Sprite(texture);
@@ -31,5 +30,5 @@ export const createBaseLayer = async (
   container.addChild(rect);
   container.addChild(text);
 
-  return container;
+  return { container, text, sprite } ;
 };
