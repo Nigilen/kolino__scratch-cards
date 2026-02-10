@@ -70,7 +70,7 @@ const createCard = async () => {
   const container = new Container();
   const { container: base, text, sprite: baseSprite } = await createBaseLayer(baseLayerImg, data.cards.values.empty, '#ffffff', 60);
   const cover = await createCoverLayer(coverLayerImg);
-  const { rect, texture } = await createMaskLayer(cover, app);
+  const { rect, texture } = await createMaskLayer(cover, app, STATE.WORLD_WIDTH, STATE.WORLD_HEIGHT);
 
 
   const scratchAnimation = (delta: Ticker) => {
