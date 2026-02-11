@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import ScratchLayout from '@/components/game/ScratchLayout.vue';
-import { data } from '@/data';
+import { mainConfig } from '@/config/mainConfig';
 import { ref, watch } from 'vue';
 
 const openCardsCounter = ref(0);
@@ -22,7 +22,7 @@ const handleCardOpen = () => {
 const handleCardOpened = () => {
   openedCardsCounter.value++;
   console.log(openedCardsCounter.value)
-  if (openedCardsCounter.value === data.cards.quantity) {
+  if (openedCardsCounter.value === mainConfig.cards.quantity) {
     emit('gameEnd');
   }
 };
@@ -38,7 +38,7 @@ watch(() => props.isOpenModal, () => {
 
 <template>
   <ul class="list">
-    <li class="item" v-for="card in data.cards.quantity" :key="card">
+    <li class="item" v-for="card in mainConfig.cards.quantity" :key="card">
       <ScratchLayout 
         @cardOpen="handleCardOpen" 
         @cardOpened="handleCardOpened"
