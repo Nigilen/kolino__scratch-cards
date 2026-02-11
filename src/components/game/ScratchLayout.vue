@@ -12,8 +12,10 @@ import { setup } from '@/components/game/setup';
 import { gameConfig } from '@/config/gameConfig';
 import { mainConfig } from '@/config/mainConfig';
 
-const app = new Application();
-const sceneRef = ref<HTMLDivElement>();
+
+let app: Application | null = null;
+let resizeObserver: ResizeObserver | null = null;
+const sceneRef = ref<HTMLDivElement | null>(null);
 
 const currentX = ref({ x: 0, y: 50 });
 const movingTopRight = ref(true);
@@ -63,11 +65,12 @@ const updatePosition = (delta: number) => {
 const renderMask = (masklLayer: Graphics, texture: RenderTexture) => {
   masklLayer.circle(currentX.value.x, currentX.value.y, 50);
   masklLayer.fill('#000000');
-  app.renderer.render({ container: masklLayer, target: texture });
+  app?.renderer.render({ container: masklLayer, target: texture });
 };
 
 
 const createCard = async () => {
+  if (!app) return;
   const container = new Container();
   const { container: base, text, sprite: baseSprite } = await createBaseLayer(baseLayerImg, mainConfig.cards.values.empty, '#ffffff', 60);
   const cover = await createCoverLayer(coverLayerImg);
@@ -78,7 +81,7 @@ const createCard = async () => {
     updatePosition(delta.deltaTime);
     renderMask(rect, texture);
     if (currentX.value.y > gameConfig.worldHeight && currentX.value.x > gameConfig.worldWidth) {
-      app.ticker.remove(scratchAnimation);
+      app?.ticker.remove(scratchAnimation);
       emits('cardOpened');
       openedCardsCounter.value++;
     }
@@ -86,7 +89,7 @@ const createCard = async () => {
 
   cover.once('pointerdown', () => {
     handleOpenCard(text, baseSprite);
-    app.ticker.add(scratchAnimation);
+    app?.ticker.add(scratchAnimation);
   });
   
 
@@ -97,7 +100,7 @@ const createCard = async () => {
 
 watch(() => props.isOpenModal, async () => {
   if (!props.isOpenModal) {
-    app.stage.removeChildren();
+    app?.stage.removeChildren();
     openedCardsCounter.value = 0;
     currentX.value = { x: 0, y: 50 };
     await createCard();
@@ -105,17 +108,37 @@ watch(() => props.isOpenModal, async () => {
 });
 
 onMounted(async () => {
-  if (!sceneRef.value) return;
-  await setup(app, sceneRef.value);
+  const scene = sceneRef.value;
+  if (!scene) return;
+
+  app = new Application();
+
+  await setup(app, scene);
   await createCard();
 
-  handleResize(app, sceneRef.value);
-  window.addEventListener('resize', () => handleResize(app, sceneRef.value!));
+  handleResize(
+    app, 
+    scene.offsetWidth, scene.offsetHeight, 
+    gameConfig.worldWidth, gameConfig.worldHeight
+  );
+  resizeObserver = new ResizeObserver(() => {
+    if (app) {
+      handleResize(
+        app, 
+        scene.offsetWidth, scene.offsetHeight, 
+        gameConfig.worldWidth, gameConfig.worldHeight
+      );
+    }
+  });
+  resizeObserver.observe(scene);
+
 });
 
 onUnmounted(() => {
-  window.addEventListener('resize', () => handleResize(app, sceneRef.value!));
-  app.destroy();
+  app?.destroy(true, { children: true, texture: true });
+  app = null;
+  resizeObserver?.disconnect();
+  resizeObserver = null;
 });
 </script>
 
