@@ -72,7 +72,7 @@ const renderMask = (masklLayer: Graphics, texture: RenderTexture) => {
 const createCard = async () => {
   if (!app) return;
   const container = new Container();
-  const { container: base, text, sprite: baseSprite } = await createBaseLayer(baseLayerImg, mainConfig.cards.values.empty, '#ffffff', 60);
+  const { container: base, text, sprite: baseSprite } = await createBaseLayer(baseLayerImg, mainConfig.cards.values.empty, '#ffffff', 60, gameConfig.worldWidth, gameConfig.worldHeight);
   const cover = await createCoverLayer(coverLayerImg);
   const { rect, texture } = await createMaskLayer(cover, app, gameConfig.worldWidth, gameConfig.worldHeight);
 
