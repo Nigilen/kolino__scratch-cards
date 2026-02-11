@@ -1,5 +1,5 @@
 import { Assets, Container, Graphics, Sprite, Text } from "pixi.js";
-import { STATE } from "./constants";
+import { gameConfig } from "@/config/gameConfig";
 
 export const createBaseLayer = async (
   layerImg: string,
@@ -11,7 +11,7 @@ export const createBaseLayer = async (
   const texture = await Assets.load(layerImg);
   const sprite = new Sprite(texture);
   const rect = new Graphics();
-  rect.rect(0, 0, STATE.WORLD_WIDTH, STATE.WORLD_HEIGHT);
+  rect.rect(0, 0, gameConfig.worldWidth, gameConfig.worldHeight);
   rect.fill(0x000000);
   rect.alpha = 0.7;
   
@@ -23,7 +23,7 @@ export const createBaseLayer = async (
       fill: textFill,
     },
     anchor: { x: 0.5, y: 0.5 },
-    position: { x: STATE.WORLD_WIDTH / 2, y: STATE.WORLD_HEIGHT / 2 },
+    position: { x: gameConfig.worldWidth / 2, y: gameConfig.worldHeight / 2 },
   });
 
   container.addChild(sprite);

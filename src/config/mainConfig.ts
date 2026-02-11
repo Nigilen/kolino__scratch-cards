@@ -1,4 +1,4 @@
-interface Data {
+interface MainConfig {
   title: string;
   cards: {
     quantity: number;
@@ -13,7 +13,7 @@ interface Data {
   };
 };
 
-export const data: Data = {
+export const mainConfig: MainConfig = {
   title: 'Scratch The Cards',
   cards: {
     quantity: 3,

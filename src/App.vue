@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import GameTitle from '@/components/ui/UiTitle.vue';
 import UiModal from '@/components/ui/UiModal.vue';
 import ScratchCards from './components/game/ScratchCards.vue';
-import { data } from '@/data';
+import { mainConfig } from '@/config/mainConfig';
 
 const isOpenModal = ref(false);
 
@@ -31,7 +31,7 @@ const handleCloseModal = () => {
     <Transition>
       <UiModal 
         v-if="isOpenModal" 
-        :winValue="data.cards.values.win" 
+        :winValue="mainConfig.cards.values.win" 
         @modalClose="handleCloseModal" 
       />
     </Transition>

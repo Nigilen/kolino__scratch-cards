@@ -1,7 +1,10 @@
 import type { Application } from "pixi.js";
-import { STATE } from "@/components/game/constants";
 
-export const handleResize = (app: Application, scene: HTMLDivElement) => {
-  app.renderer.resize(scene.offsetWidth, scene.offsetHeight);
-  app.stage.scale.set(scene.offsetWidth / STATE.WORLD_WIDTH, scene.offsetHeight / STATE.WORLD_HEIGHT);
+export const handleResize = (
+  app: Application, 
+  sceneWidth: number, sceneHeight: number, 
+  logickalWidth: number, logicalHeight: number
+) => {
+  app.renderer.resize(sceneWidth, sceneHeight);
+  app.stage.scale.set(sceneWidth / logickalWidth, sceneHeight / logicalHeight);
 };

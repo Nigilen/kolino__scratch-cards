@@ -9,8 +9,8 @@ import { createCoverLayer } from '@/components/game/createCoverLayer';
 import { createBaseLayer } from '@/components/game/createBaseLayer';
 import { createMaskLayer } from '@/components/game/createMaskLayer';
 import { setup } from '@/components/game/setup';
-import { STATE } from '@/components/game/constants';
-import { data } from '@/data';
+import { gameConfig } from '@/config/gameConfig';
+import { mainConfig } from '@/config/mainConfig';
 
 const app = new Application();
 const sceneRef = ref<HTMLDivElement>();
@@ -37,7 +37,7 @@ const handleClick = (value: string) => {
 const handleOpenCard = async (value: Text, baseSprite: Sprite) => {
   handleClick(value.text);
   if (props.openCardsCounter === 1) {
-    value.text = data.cards.values.win;
+    value.text = mainConfig.cards.values.win;
     baseSprite.texture = await Assets.load(baseLayerImgWin);
   }
 };
@@ -46,14 +46,14 @@ const updatePosition = (delta: number) => {
   if (movingTopRight.value) {
     currentX.value.x += 10 * delta;
     currentX.value.y -= 10 * delta;
-    if (currentX.value.y < 0 || currentX.value.x > STATE.WORLD_WIDTH) {
+    if (currentX.value.y < 0 || currentX.value.x > gameConfig.worldWidth) {
       movingTopRight.value = false;
       currentX.value.x += 45;
     }
   } else {
     currentX.value.x -= 10 * delta;
     currentX.value.y += 10 * delta;
-    if (currentX.value.x < 0 || currentX.value.y > STATE.WORLD_HEIGHT - 50) {
+    if (currentX.value.x < 0 || currentX.value.y > gameConfig.worldHeight - 50) {
       movingTopRight.value = true;
       currentX.value.y += 45;
     }
@@ -69,15 +69,15 @@ const renderMask = (masklLayer: Graphics, texture: RenderTexture) => {
 
 const createCard = async () => {
   const container = new Container();
-  const { container: base, text, sprite: baseSprite } = await createBaseLayer(baseLayerImg, data.cards.values.empty, '#ffffff', 60);
+  const { container: base, text, sprite: baseSprite } = await createBaseLayer(baseLayerImg, mainConfig.cards.values.empty, '#ffffff', 60);
   const cover = await createCoverLayer(coverLayerImg);
-  const { rect, texture } = await createMaskLayer(cover, app, STATE.WORLD_WIDTH, STATE.WORLD_HEIGHT);
+  const { rect, texture } = await createMaskLayer(cover, app, gameConfig.worldWidth, gameConfig.worldHeight);
 
 
   const scratchAnimation = (delta: Ticker) => {
     updatePosition(delta.deltaTime);
     renderMask(rect, texture);
-    if (currentX.value.y > STATE.WORLD_HEIGHT && currentX.value.x > STATE.WORLD_WIDTH) {
+    if (currentX.value.y > gameConfig.worldHeight && currentX.value.x > gameConfig.worldWidth) {
       app.ticker.remove(scratchAnimation);
       emits('cardOpened');
       openedCardsCounter.value++;
