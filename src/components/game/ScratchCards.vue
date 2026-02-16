@@ -3,34 +3,32 @@ import ScratchLayout from '@/components/game/ScratchLayout.vue';
 import { mainConfig } from '@/config/mainConfig';
 import { ref, watch } from 'vue';
 
-const openCardsCounter = ref(0);
-const openedCardsCounter = ref(0);
-
 const props = defineProps<{
-  isOpenModal: boolean;
+  modelValue: boolean,
 }>();
 
-const emit = defineEmits<{
-  (event: 'gameEnd'): void;
+const openCardsCounter = ref(0);
+const totalCardsOpened = ref(0);
+
+const emits = defineEmits<{
+  (e: 'update:modelValue', value: boolean): void
 }>();
 
-const handleCardOpen = () => {
-  openCardsCounter.value++;
-
+const handleOpenModal = () => {
+  emits('update:modelValue', true);
 };
 
 const handleCardOpened = () => {
-  openedCardsCounter.value++;
-  console.log(openedCardsCounter.value)
-  if (openedCardsCounter.value === mainConfig.cards.quantity) {
-    emit('gameEnd');
+  totalCardsOpened.value++;
+  if (totalCardsOpened.value === mainConfig.cards.quantity) {
+    handleOpenModal();
   }
 };
 
-watch(() => props.isOpenModal, () => {
-  if (!props.isOpenModal) {
+watch(() => props.modelValue, () => {
+  if (!props.modelValue) {
     openCardsCounter.value = 0;
-    openedCardsCounter.value = 0;
+    totalCardsOpened.value = 0;
   }
 });
 
@@ -40,10 +38,9 @@ watch(() => props.isOpenModal, () => {
   <ul class="list">
     <li class="item" v-for="card in mainConfig.cards.quantity" :key="card">
       <ScratchLayout 
-        @cardOpen="handleCardOpen" 
         @cardOpened="handleCardOpened"
-        :openCardsCounter="openCardsCounter" 
-        :isOpenModal="props.isOpenModal"
+        v-model:openCardsCounter="openCardsCounter"
+        :isReset="!props.modelValue"
       />
     </li>
   </ul>

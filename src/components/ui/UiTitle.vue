@@ -8,9 +8,9 @@ import { mainConfig } from '@/config/mainConfig';
 
 <style lang="css" scoped>
 .title {
-  font-size: min(60px, 10vmin);
+  margin-block: 0 5dvh;
   text-align: center;
-  margin-block: 0;
+  font-size: min(60px, 10vmin);
   line-height: 1;
 }
 </style>
