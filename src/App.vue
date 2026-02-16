@@ -7,41 +7,21 @@ import { mainConfig } from '@/config/mainConfig';
 
 const isOpenModal = ref(false);
 
-
-const handleOpenModal = () => {
-  isOpenModal.value = true;
-};
-
-const handleCloseModal = () => {
-  isOpenModal.value = false;
-};
-
 </script>
 
 <template>
-  <main class="main">
+  <main>
     <GameTitle />
-    <ScratchCards 
-      @gameEnd="handleOpenModal" 
-      :isOpenModal="isOpenModal"
-    />
+    <ScratchCards v-model="isOpenModal" />
   </main>
   <Teleport to="body">
-    <Transition>
-      <UiModal 
-        v-if="isOpenModal" 
-        :winValue="mainConfig.cards.values.win" 
-        @modalClose="handleCloseModal" 
-      />
-    </Transition>
+    <UiModal 
+      v-model="isOpenModal"
+      :winValue="mainConfig.cards.values.win" 
+    />
   </Teleport>
 </template>
 
 <style lang="css" scoped>
-.main {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  row-gap: min(30px, 12vmax);
-}
+
 </style>
