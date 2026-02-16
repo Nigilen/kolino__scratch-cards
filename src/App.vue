@@ -14,7 +14,6 @@ const handleOpenModal = () => {
 
 const handleCloseModal = () => {
   isOpenModal.value = false;
-  // window.location.reload();
 };
 
 </script>
