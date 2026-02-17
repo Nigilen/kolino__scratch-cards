@@ -1,10 +1,7 @@
 <script lang="ts" setup>
-import { Application, Assets, Container, Graphics, RenderTexture, Sprite, Text, Ticker } from 'pixi.js';
+import { Application, Assets, Graphics, RenderTexture, Ticker } from 'pixi.js';
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 import { handleResize } from '@/components/game/resize';
-// import baseLayerImg from '@/assets/images/base-layer.avif';
-// import baseLayerImgWin from '@/assets/images/base-layer--win.avif';
-// import coverLayerImg from '@/assets/images/cover-layer.avif';
 import { createCoverLayer } from '@/components/game/createCoverLayer';
 import { createBaseLayer } from '@/components/game/createBaseLayer';
 import { createMaskLayer } from '@/components/game/createMaskLayer';
@@ -12,20 +9,6 @@ import { setup } from '@/components/game/setup';
 import { gameConfig } from '@/config/gameConfig';
 import { mainConfig } from '@/config/mainConfig';
 import { loadAssets } from './assets';
-
-let app: Application | null = null;
-let resizeObserver: ResizeObserver | null = null;
-const sceneRef = ref<HTMLDivElement | null>(null);
-
-let currentTicker: ((delta: Ticker) => void) | null = null;
-let currentCard: {
-  base: Container;
-  text: Text;
-  baseSprite: Sprite;
-  cover: Container;
-  rect: Graphics;
-  renderTexture: RenderTexture;
-} | null = null;
 
 const props = defineProps<{
   openCardsCounter: number;
@@ -37,88 +20,78 @@ const emits = defineEmits<{
   (event: 'cardOpened'): void;
 }>();
 
-const currentX = ref({ x: 0, y: 50 });
-const movingTopRight = ref(true);
+let app: Application | null = null;
+let resizeObserver: ResizeObserver | null = null;
+const sceneRef = ref<HTMLDivElement | null>(null);
 
-const updatePosition = (delta: number) => {
-  if (movingTopRight.value) {
-    currentX.value.x += 10 * delta;
-    currentX.value.y -= 10 * delta;
-    if (currentX.value.y < 0 || currentX.value.x > gameConfig.worldWidth) {
-      movingTopRight.value = false;
-      currentX.value.x += 45;
-    }
-  } else {
-    currentX.value.x -= 10 * delta;
-    currentX.value.y += 10 * delta;
-    if (currentX.value.x < 0 || currentX.value.y > gameConfig.worldHeight - 50) {
-      movingTopRight.value = true;
-      currentX.value.y += 45;
-    }
-  }
-};
-
-const renderMask = (masklLayer: Graphics, texture: RenderTexture) => {
-  masklLayer.circle(currentX.value.x, currentX.value.y, 50);
-  masklLayer.fill('#000000');
-  app?.renderer.render({ container: masklLayer, target: texture });
-};
+let currentPos: { x: number, y: number } = { x: 0, y: 50 };
+let movingTopRight: boolean = true;
 
 const createCard = async () => {
   if (!app) return;
-  const { container: base, text, sprite: baseSprite } = await createBaseLayer('baseLayerImg', mainConfig.cards.values.empty, '#ffffff', 60, gameConfig.worldWidth, gameConfig.worldHeight);
-  const cover = await createCoverLayer('coverLayerImg');
-  const { rect, texture } = await createMaskLayer(cover, app, gameConfig.worldWidth, gameConfig.worldHeight);
 
-  currentCard = {
-    base: base,
-    text: text,
-    baseSprite: baseSprite,
-    cover: cover,
-    rect: rect,
-    renderTexture: texture,
+  const { maskRect, maskSprite, maskTexture } = await createMaskLayer();
+  const { baseContainer, baseText, baseSprite } = await createBaseLayer();
+  const { coverLayer } = await createCoverLayer();
+  coverLayer.mask = maskSprite;
+
+  const updatePosition = (delta: Ticker) => {
+    if (movingTopRight) {
+      currentPos.x += 10 * delta.deltaTime;
+      currentPos.y -= 10 * delta.deltaTime;
+      if (currentPos.y < 0 || currentPos.x > gameConfig.worldWidth) {
+        movingTopRight = false;
+        currentPos.x += 45;
+      }
+    } else {
+      currentPos.x -= 10 * delta.deltaTime;
+      currentPos.y += 10 * delta.deltaTime;
+      if (currentPos.x < 0 || currentPos.y > gameConfig.worldHeight - 50) {
+        movingTopRight = true;
+        currentPos.y += 45;
+      }
+    }
   };
+
+  const renderMask = (masklLayer: Graphics, texture: RenderTexture) => {
+    masklLayer.circle(currentPos.x, currentPos.y, 50);
+    masklLayer.fill('#000000');
+    app?.renderer.render({ container: masklLayer, target: texture });
+  };
+
   const scratchAnimation = (delta: Ticker) => {
-    updatePosition(delta.deltaTime);
-    renderMask(rect, texture);
-    if (currentX.value.y > gameConfig.worldHeight && 
-        currentX.value.x > gameConfig.worldWidth) {
+    updatePosition(delta);
+    renderMask(maskRect, maskTexture);
+    if (currentPos.y > gameConfig.worldHeight && 
+        currentPos.x > gameConfig.worldWidth) {
       app?.ticker.remove(scratchAnimation);
-      cover.removeListener('pointerdown', handleOpenCard);
+      coverLayer.removeListener('pointerdown', handleOpenCard);
       emits('cardOpened');
     };
   };
 
-  currentTicker = scratchAnimation;
-
   const handleOpenCard = async () => {
     emits('update:openCardsCounter', props.openCardsCounter + 1);
     if (props.openCardsCounter === 1) {
-      text.text = mainConfig.cards.values.win;
+      baseText.text = mainConfig.cards.values.win;
       baseSprite.texture = Assets.get('baseLayerImgWin');
     }
     app?.ticker.add(scratchAnimation);
   };
 
-  cover.once('pointerdown', handleOpenCard);
+  coverLayer.interactive = true;
+  coverLayer.once('pointerdown', handleOpenCard);
 
-  app.stage.addChild(base);
-  app.stage.addChild(cover);
+  app.stage.addChild(baseContainer);
+  app.stage.addChild(coverLayer);
+  app.stage.addChild(maskSprite);
+  app.renderer.render({ container: maskRect, target: maskTexture });
 }  
 
 const resetGame = async () => {
-  if (currentTicker) {
-    app?.ticker.remove(currentTicker);
-    currentTicker = null;
-  }
-
-  currentCard?.text.destroy({ children: true, texture: true });
-
   app?.stage.removeChildren();
-
-
-  currentX.value = { x: 0, y: 50 };
-  movingTopRight.value = true;
+  currentPos = { x: 0, y: 50 };
+  movingTopRight = true;
   await createCard();
 };
 
@@ -127,17 +100,12 @@ watch(() => props.isReset, async () => {
 });
 
 onMounted(async () => {
+  app = new Application();
   const scene = sceneRef.value;
-  if (!scene) return;
 
-  // Assets.loader.maxConcurrency = 2;
-
-  resetGame();
+  if (!scene || !app) return;
 
   await loadAssets();
-
-  app = new Application();
-
   await setup(app, scene);
   await createCard();
 
@@ -147,16 +115,13 @@ onMounted(async () => {
     gameConfig.worldWidth, gameConfig.worldHeight
   );
   resizeObserver = new ResizeObserver(() => {
-    if (app) {
-      handleResize(
-        app, 
-        scene.offsetWidth, scene.offsetHeight, 
-        gameConfig.worldWidth, gameConfig.worldHeight
-      );
-    }
+    handleResize(
+      app, 
+      scene.offsetWidth, scene.offsetHeight, 
+      gameConfig.worldWidth, gameConfig.worldHeight
+    );
   });
   resizeObserver.observe(scene);
-
 });
 
 onUnmounted(() => {

@@ -1,19 +1,16 @@
-import { Application, Graphics, RenderTexture, Sprite, Container } from "pixi.js";
+import { Graphics, RenderTexture, Sprite } from "pixi.js";
+import { gameConfig } from '@/config/gameConfig';
 
-export const createMaskLayer = async (object: Container, app: Application, width: number, height: number) => {
+export const createMaskLayer = async () => {
   const rect = new Graphics();
-  rect.rect(0, 0, width, height);
+  rect.rect(0, 0, gameConfig.worldWidth, gameConfig.worldHeight);
   rect.fill('#ffffff');
-  
-  const texture = RenderTexture.create({ width: width, height: height,  });
-  const textureSprite = Sprite.from(texture);
-  const container = new Container();
-  container.addChild(textureSprite);
-  app.stage.addChild(container);
+  const texture = RenderTexture.create({ width: gameConfig.worldWidth, height: gameConfig.worldHeight });
+  const sprite = Sprite.from(texture);
 
-  object.mask = textureSprite;
-  object.interactive = true;
-
-  app.renderer.render({ container: rect, target: texture });
-  return { rect, texture };
+  return { 
+    maskRect: rect, 
+    maskTexture: texture, 
+    maskSprite: sprite
+  };
 };
