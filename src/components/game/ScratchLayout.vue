@@ -2,19 +2,30 @@
 import { Application, Assets, Container, Graphics, RenderTexture, Sprite, Text, Ticker } from 'pixi.js';
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 import { handleResize } from '@/components/game/resize';
-import baseLayerImg from '@/assets/images/base-layer.avif';
-import baseLayerImgWin from '@/assets/images/base-layer--win.avif';
-import coverLayerImg from '@/assets/images/cover-layer.avif';
+// import baseLayerImg from '@/assets/images/base-layer.avif';
+// import baseLayerImgWin from '@/assets/images/base-layer--win.avif';
+// import coverLayerImg from '@/assets/images/cover-layer.avif';
 import { createCoverLayer } from '@/components/game/createCoverLayer';
 import { createBaseLayer } from '@/components/game/createBaseLayer';
 import { createMaskLayer } from '@/components/game/createMaskLayer';
 import { setup } from '@/components/game/setup';
 import { gameConfig } from '@/config/gameConfig';
 import { mainConfig } from '@/config/mainConfig';
+import { loadAssets } from './assets';
 
 let app: Application | null = null;
 let resizeObserver: ResizeObserver | null = null;
 const sceneRef = ref<HTMLDivElement | null>(null);
+
+let currentTicker: ((delta: Ticker) => void) | null = null;
+let currentCard: {
+  base: Container;
+  text: Text;
+  baseSprite: Sprite;
+  cover: Container;
+  rect: Graphics;
+  renderTexture: RenderTexture;
+} | null = null;
 
 const props = defineProps<{
   openCardsCounter: number;
@@ -55,10 +66,18 @@ const renderMask = (masklLayer: Graphics, texture: RenderTexture) => {
 
 const createCard = async () => {
   if (!app) return;
-  const { container: base, text, sprite: baseSprite } = await createBaseLayer(baseLayerImg, mainConfig.cards.values.empty, '#ffffff', 60, gameConfig.worldWidth, gameConfig.worldHeight);
-  const cover = await createCoverLayer(coverLayerImg);
+  const { container: base, text, sprite: baseSprite } = await createBaseLayer('baseLayerImg', mainConfig.cards.values.empty, '#ffffff', 60, gameConfig.worldWidth, gameConfig.worldHeight);
+  const cover = await createCoverLayer('coverLayerImg');
   const { rect, texture } = await createMaskLayer(cover, app, gameConfig.worldWidth, gameConfig.worldHeight);
 
+  currentCard = {
+    base: base,
+    text: text,
+    baseSprite: baseSprite,
+    cover: cover,
+    rect: rect,
+    renderTexture: texture,
+  };
   const scratchAnimation = (delta: Ticker) => {
     updatePosition(delta.deltaTime);
     renderMask(rect, texture);
@@ -70,11 +89,13 @@ const createCard = async () => {
     };
   };
 
+  currentTicker = scratchAnimation;
+
   const handleOpenCard = async () => {
     emits('update:openCardsCounter', props.openCardsCounter + 1);
     if (props.openCardsCounter === 1) {
       text.text = mainConfig.cards.values.win;
-      baseSprite.texture = await Assets.load(baseLayerImgWin);
+      baseSprite.texture = Assets.get('baseLayerImgWin');
     }
     app?.ticker.add(scratchAnimation);
   };
@@ -85,10 +106,20 @@ const createCard = async () => {
   app.stage.addChild(cover);
 }  
 
-const resetGame = () => {
+const resetGame = async () => {
+  if (currentTicker) {
+    app?.ticker.remove(currentTicker);
+    currentTicker = null;
+  }
+
+  currentCard?.text.destroy({ children: true, texture: true });
+
   app?.stage.removeChildren();
+
+
   currentX.value = { x: 0, y: 50 };
-  createCard();
+  movingTopRight.value = true;
+  await createCard();
 };
 
 watch(() => props.isReset, async () => {
@@ -99,6 +130,9 @@ onMounted(async () => {
   const scene = sceneRef.value;
   if (!scene) return;
 
+  resetGame();
+
+  await loadAssets();
 
   app = new Application();
 
@@ -120,7 +154,7 @@ onMounted(async () => {
     }
   });
   resizeObserver.observe(scene);
-  // window.addEventListener('resize', () => console.log('resize'));
+
 });
 
 onUnmounted(() => {

@@ -5,8 +5,8 @@ export const createMaskLayer = async (object: Container, app: Application, width
   rect.rect(0, 0, width, height);
   rect.fill('#ffffff');
   
-  const texture = RenderTexture.create({ width: width, height: height });
-  const textureSprite = new Sprite(texture);
+  const texture = RenderTexture.create({ width: width, height: height,  });
+  const textureSprite = Sprite.from(texture);
   const container = new Container();
   container.addChild(textureSprite);
   app.stage.addChild(container);

@@ -9,13 +9,12 @@ export const createBaseLayer = async (
   worldHeight: number
 ): Promise<{container: Container, text: Text, sprite: Sprite}> => {
   const container = new Container();
-  const texture = await Assets.load(layerImg);
-  const sprite = new Sprite(texture);
+  const texture = Assets.get(layerImg);
+  const sprite = Sprite.from(texture);
   const rect = new Graphics();
   rect.rect(0, 0, worldWidth, worldHeight);
   rect.fill(0x000000);
   rect.alpha = 0.7;
-  
   const text = new Text({
     text: textValue.toUpperCase(),
     style: {
