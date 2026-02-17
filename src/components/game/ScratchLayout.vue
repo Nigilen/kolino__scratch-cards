@@ -130,6 +130,8 @@ onMounted(async () => {
   const scene = sceneRef.value;
   if (!scene) return;
 
+  // Assets.loader.maxConcurrency = 2;
+
   resetGame();
 
   await loadAssets();

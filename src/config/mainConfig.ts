@@ -16,7 +16,7 @@ interface MainConfig {
 export const mainConfig: MainConfig = {
   title: 'Scratch The Cards',
   cards: {
-    quantity: 3,
+    quantity: 1,
     values: {
       win: '100',
       empty: 'empty'

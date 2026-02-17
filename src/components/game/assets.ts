@@ -1,15 +1,12 @@
-import baseLayerImg from '@/assets/images/base-layer.avif';
-import baseLayerImgWin from '@/assets/images/base-layer--win.avif';
-import coverLayerImg from '@/assets/images/cover-layer.avif';
-import { Assets } from 'pixi.js';
+import baseLayerImg from '@/assets/images/base-layer.webp';
+import baseLayerImgWin from '@/assets/images/base-layer--win.webp';
+import coverLayerImg from '@/assets/images/cover-layer.webp';
+import { Assets, Texture } from 'pixi.js';
 
 export const loadAssets = async () => {
-  await Assets.load(assets);
-  console.log('as')
+  await Assets.load<Texture>([
+    { alias: 'baseLayerImg' , src: baseLayerImg},
+    { alias: 'baseLayerImgWin' , src: baseLayerImgWin},
+    { alias: 'coverLayerImg' , src: coverLayerImg},
+  ]);
 };
-
-const assets = [
-  { alias: 'baseLayerImg' , src: baseLayerImg},
-  { alias: 'baseLayerImgWin' , src: baseLayerImgWin},
-  { alias: 'coverLayerImg' , src: coverLayerImg},
-];
