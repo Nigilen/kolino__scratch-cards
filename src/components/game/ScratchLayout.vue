@@ -99,6 +99,7 @@ onMounted(async () => {
   const scene = sceneRef.value;
   if (!scene) return;
 
+
   app = new Application();
 
   await setup(app, scene);
@@ -119,6 +120,7 @@ onMounted(async () => {
     }
   });
   resizeObserver.observe(scene);
+  // window.addEventListener('resize', () => console.log('resize'));
 });
 
 onUnmounted(() => {

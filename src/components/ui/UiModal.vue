@@ -15,16 +15,18 @@ const handleModalClose = () => {
   emits('update:modelValue', false)
 };
 
+const handlePushEscape = (e: KeyboardEvent) => {
+  if (e.key === 'Escape') {
+    handleModalClose();
+  }
+};
+
 onMounted(() => {
-  window.addEventListener('keydown', (e: KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      handleModalClose();
-    }
-  });
+  window.addEventListener('keydown', handlePushEscape);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('keydown', handleModalClose);
+  window.removeEventListener('keydown', handlePushEscape);
 });
 </script>
 
